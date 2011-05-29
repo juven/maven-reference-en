@@ -3,11 +3,15 @@
   <parent>
 	<groupId>org.sonatype.mvnrefbook</groupId>
 	<artifactId>mvnref-book-parent</artifactId>
-	<version>0.9</version>
+<<<<<<< HEAD:mvnref-epub/pom.xml
+	<version>0.8.1</version>
+=======
+	<version>1.0-SNAPSHOT</version>
+>>>>>>> master:mvnref-epub/pom.xml
   </parent>
-  <artifactId>mvnref-html</artifactId>
+  <artifactId>mvnref-epub</artifactId>
   <packaging>jar</packaging>
-  <name>Maven: The Complete Reference (HTML)</name>
+  <name>Maven: The Complete Reference (ePub)</name>
   <description>A book about Apache Maven 2.x</description>
   <build>
     <resources>
@@ -15,17 +19,17 @@
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
         <includes>
-          <include>html_chunk.xsl</include>
+          <include>epub-custom.xsl</include>
         </includes>
       </resource>
     </resources>
     <plugins>
-		<plugin>
-			<groupId>org.codehaus.cjcook</groupId>
-			<artifactId>docbook-plugin</artifactId>
-			<version>1.0</version>
-			<extensions>true</extensions>
-		</plugin>
+			<plugin>
+				<groupId>org.codehaus.cjcook</groupId>
+				<artifactId>docbook-plugin</artifactId>
+				<version>1.0</version>
+				<extensions>true</extensions>
+			</plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
@@ -48,29 +52,32 @@
 				</dependencies>
 				<executions>
 					<execution>
-						<id>generate-html</id>
+						<id>generate-epub</id>
 						<phase>compile</phase>
 						<goals>
-							<goal>generate-html</goal>
+							<goal>generate-epub</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
-					<htmlCustomization>${basedir}/target/classes/html_chunk.xsl</htmlCustomization>
 					<sourceDirectory>${basedir}/target/docbook</sourceDirectory>
-					<targetDirectory>${basedir}/target/html</targetDirectory>
+					<targetDirectory>${basedir}/target/epub</targetDirectory>
 					<includes>public-book.xml</includes>
 					<xincludeSupported>true</xincludeSupported>
-					<chunkedOutput>true</chunkedOutput>
-					<chunkSectionDepth>1</chunkSectionDepth>
-					<postProcess>
-						<copy todir="${project.build.directory}/html/images">
-							<fileset dir="${basedir}/src/main/resources/images" />
-						</copy>
-						<copy todir="${project.build.directory}/html/figs/web">
-							<fileset dir="target/docbook/figs/web" />
-						</copy>
-					</postProcess>
+                    <bookFile>${project.build.directory}/book-mvnref.epub</bookFile>
+                    <htmlStylesheet>epub-custom.css</htmlStylesheet>
+                    <epubCustomization>${basedir}/src/main/resources/epub-custom.xsl</epubCustomization>
+                    <postProcess>
+                        <!-- Copy the images -->
+                        <copy todir="${project.build.directory}/epub/figs/web">
+                            <fileset dir="target/docbook/figs/web" />
+                        </copy>
+                        <copy todir="${project.build.directory}/epub/covers">
+                            <fileset dir="target/docbook/covers" />
+                        </copy>
+                        <copy todir="${project.build.directory}/epub" 
+                              file="src/main/resources/epub-custom.css"/>
+                    </postProcess>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -99,11 +106,32 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
-				  <classesDirectory>${basedir}/target/html</classesDirectory>
+				  <classesDirectory>${basedir}/target/epub</classesDirectory>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>install-epub</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<file>${basedir}/target/epub/public-book.epub</file>
+							<groupId>${groupId}</groupId>
+							<artifactId>${artifactId}</artifactId>
+							<version>${version}</version>
+							<packaging>epub</packaging>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
     </plugins>
   </build>
+  
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -111,4 +139,5 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+
 </project>
